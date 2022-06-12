@@ -1,4 +1,4 @@
-package com.funy4.data
+package com.funy4.business
 
 import org.junit.Test
 

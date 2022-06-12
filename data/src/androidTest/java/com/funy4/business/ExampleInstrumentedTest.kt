@@ -1,4 +1,4 @@
-package com.funy4.data
+package com.funy4.business
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
