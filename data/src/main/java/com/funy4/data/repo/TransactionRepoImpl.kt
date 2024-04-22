@@ -1,13 +1,17 @@
 package com.funy4.data.repo
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.funy4.data.db.dao.TransactionDao
 import com.funy4.data.toEntity
 import com.funy4.data.toModel
 import com.funy4.domain.model.TransactionModel
+import com.funy4.domain.model.TransactionShortModel
 import com.funy4.domain.model.type.TransactionType
 import com.funy4.domain.repo.TransactionRepo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.time.LocalDateTime
 import java.util.*
 import javax.inject.Inject
 
@@ -32,4 +36,11 @@ open class TransactionRepoImpl @Inject constructor(
     override fun getAllFlow(): Flow<List<TransactionModel>> =
         transactionDao.getAll().map { list -> list.map { it.toModel() } }
 
+    override fun getAllShort(): List<TransactionShortModel> {
+        return buildList {
+            repeat(10) {
+                add(TransactionShortModel(LocalDateTime.now().plusDays(it.toLong()), Random().nextDouble()))
+            }
+        }
+    }
 }

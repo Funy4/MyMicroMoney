@@ -27,7 +27,7 @@ import com.google.accompanist.navigation.animation.composable
 fun NavGraph(navController: NavHostController, padding: PaddingValues) {
     AnimatedNavHost(
         navController = navController,
-        startDestination = BottomNavBarScreens.Expenses.route
+        startDestination = BottomNavBarScreens.Ai.route
     ) {
         composable(
             route = BottomNavBarScreens.Cash.route,
