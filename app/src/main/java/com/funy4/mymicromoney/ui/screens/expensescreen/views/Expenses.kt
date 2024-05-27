@@ -24,9 +24,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.PaintingStyle.Companion.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -56,7 +61,7 @@ fun ExpensesIconsList(
                 modifier = Modifier.padding(10.dp),
                 title = expense.name,
                 color = Color(expense.color),
-                imageVector = Icons.Default.Face,
+                iconId = expense.iconId,
                 cost = expense.money,
                 onItemClick = { onItemClick(expense) },
                 onLongPressItem = { onLongPressItem(expense) }
@@ -87,7 +92,7 @@ fun CategoryItem(
     modifier: Modifier = Modifier,
     title: String,
     color: Color,
-    imageVector: ImageVector,
+    iconId: Int,
     cost: Double,
     onItemClick: () -> Unit,
     onLongPressItem: () -> Unit
@@ -129,8 +134,10 @@ fun CategoryItem(
                 Icon(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(vertical = 2.dp),
-                    imageVector = imageVector,
+                        .padding(vertical = 2.dp)
+                        .size(60.dp)
+                        .padding(8.dp),
+                    painter = painterResource(id = iconId),
                     contentDescription = null,
                     tint = Color.White
                 )
@@ -142,7 +149,7 @@ fun CategoryItem(
                 textAlign = TextAlign.Center,
                 fontStyle = FontStyle.Italic,
                 fontWeight = FontWeight.Bold,
-                color = color,
+                color = Color.Black,
             )
         }
     }
@@ -174,15 +181,3 @@ fun CategoryItemNew(
     }
 }
 
-@Composable
-@Preview
-fun IconPreview() {
-    CategoryItem(
-        title = "food",
-        color = Color.Black,
-        imageVector = Icons.Default.Favorite,
-        cost = 100.0,
-        onItemClick = {}
-    ) {
-    }
-}

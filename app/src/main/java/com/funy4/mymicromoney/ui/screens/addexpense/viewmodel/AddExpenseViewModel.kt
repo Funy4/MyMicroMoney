@@ -10,18 +10,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.funy4.domain.model.CashModel
 import com.funy4.domain.model.ExpenseModel
-import com.funy4.domain.model.type.TransactionType
 import com.funy4.domain.usecase.cash.GetAllCashUseCase
 import com.funy4.domain.usecase.expenses.GetAllExpensesUseCase
-import com.funy4.domain.usecase.transactions.AddTransactionUseCase
-import com.funy4.mymicromoney.Mocks
+import com.funy4.domain.usecase.transactions.AddTransactionExpenseUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import java.lang.RuntimeException
 import java.time.LocalDate
+import java.util.UUID
 import javax.inject.Inject
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -29,56 +27,120 @@ import javax.inject.Inject
 class AddExpenseViewModel @Inject constructor(
     private val getAllCashUseCase: GetAllCashUseCase,
     private val getAllExpensesUseCase: GetAllExpensesUseCase,
-    private val addTransactionUseCase: AddTransactionUseCase,
+    private val addTransactionExpenseUseCase: AddTransactionExpenseUseCase,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    //    val cashList = getAllCashUseCase()
-//    val expensesList = getAllExpensesUseCase()
-    val expensesList = flow { emit(Mocks.expensesList) }
-    val cashList = flow { emit(Mocks.cashList) }
+    val expensesList = mutableStateOf<List<ExpenseModel>>(listOf())
+    val cashList = mutableStateOf<List<CashModel>>(listOf())
 
-    var date by mutableStateOf(LocalDate.now())
-    var cashSelected by mutableStateOf<CashModel?>(null)
-    var expensesSelected by mutableStateOf<ExpenseModel?>(null)
+    var cashSelected = mutableStateOf<CashModel?>(null)
+    val expensesSelected = mutableStateOf<ExpenseModel?>(null)
     var transactionName by mutableStateOf("")
     var money by mutableStateOf(0.0)
+
+    var baseExpenseId = UUID.randomUUID()
+    val isShowDatePicker = mutableStateOf(false)
+    val selectedDateTime = mutableStateOf(LocalDate.now())
+
+    val isShowSelectCash = mutableStateOf(false)
+    val isShowSelectExpense = mutableStateOf(false)
 
     private val _uiEvent = Channel<AddExpenseUiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
-    fun onEvent(event: AddExpenseEvent) {
-        when (event) {
-            AddExpenseEvent.OnBack -> sendUiEvent(AddExpenseUiEvent.PopBackStack)
-            is AddExpenseEvent.OnCashChange -> cashSelected = event.cashModel
-            is AddExpenseEvent.OnExpenseChange -> expensesSelected = event.expense
-            is AddExpenseEvent.OnDateChange -> date = event.date
-            is AddExpenseEvent.OnMoneyChange -> money = event.money.toDouble()
-            is AddExpenseEvent.OnTransactionNameChange -> transactionName = event.transactionName
-            AddExpenseEvent.SaveExpense -> {
-                saveExpense()
-                sendUiEvent(AddExpenseUiEvent.PopBackStack)
+    init {
+        viewModelScope.launch {
+            launch {
+                getAllExpensesUseCase().collect {
+                    expensesList.value = it
+                    expensesSelected.value = it.find { it.id == baseExpenseId }
+//                    if (expensesSelected.value == null) expensesSelected.value = it.firstOrNull()
+                }
+            }
+            launch {
+                getAllCashUseCase().collect {
+                    cashList.value = it
+                    if (cashSelected.value == null) cashSelected.value = it.firstOrNull()
+                }
             }
 
         }
     }
 
-    init {
-        viewModelScope.launch {
-            val expenseId = savedStateHandle.get<String>("expenseId")
-            cashSelected = cashList.first().first()
-//            expensesSelected =
+
+    fun onEvent(event: AddExpenseEvent) {
+        when (event) {
+            AddExpenseEvent.OnBack -> sendUiEvent(AddExpenseUiEvent.PopBackStack)
+            is AddExpenseEvent.OnCashChange -> {
+                cashSelected.value = event.cashModel
+                isShowSelectCash.value = false
+            }
+
+            is AddExpenseEvent.OnExpenseChange -> {
+                expensesSelected.value = event.expense
+                isShowSelectExpense.value = false
+            }
+
+            is AddExpenseEvent.OnDateChange -> {
+                selectedDateTime.value = event.date
+            }
+
+            is AddExpenseEvent.OnMoneyChange -> {
+                money = event.money.toDouble()
+            }
+
+            is AddExpenseEvent.OnTransactionNameChange -> {
+                transactionName = event.transactionName
+            }
+
+            is AddExpenseEvent.OnSaveExpenseClick -> {
+                if (event.name.isEmpty() || event.cost == 0.0) {
+                    sendUiEvent(AddExpenseUiEvent.FieldsIsEmpty)
+                    return
+                }
+                saveExpense(event.name, event.cost)
+                sendUiEvent(AddExpenseUiEvent.PopBackStack)
+            }
+
+            AddExpenseEvent.OnSelectDateClick -> {
+                isShowDatePicker.value = true
+            }
+
+            AddExpenseEvent.OnDismissSelectDate -> {
+                isShowDatePicker.value = false
+            }
+
+            AddExpenseEvent.OnChangeCashClick -> {
+                isShowSelectCash.value = true
+            }
+
+            AddExpenseEvent.OnChangeExpenseClick -> {
+                isShowSelectExpense.value = true
+            }
+
+            AddExpenseEvent.OnDismissChangeCash -> {
+                isShowSelectCash.value = false
+            }
+
+            AddExpenseEvent.OnDismissChangeExpense -> {
+                isShowSelectExpense.value = false
+            }
+
+            is AddExpenseEvent.InitBaseExpense -> {
+                baseExpenseId = event.id
+            }
         }
     }
 
-    private fun saveExpense() {
+    private fun saveExpense(name: String, cost: Double) {
         viewModelScope.launch {
-            addTransactionUseCase(
-                name = transactionName,
-                cost = money,
-                cashId = cashSelected!!.id,
-                transactionType = TransactionType.EXPENSE,
-                date = date
+            addTransactionExpenseUseCase(
+                name = name,
+                cost = cost,
+                cashId = cashSelected.value!!.id,
+                date = selectedDateTime.value,
+                expenseId = expensesSelected.value?.id ?: throw RuntimeException("Expense not found")
             )
         }
     }

@@ -5,6 +5,7 @@ import com.funy4.data.toEntity
 import com.funy4.data.toModel
 import com.funy4.domain.model.CashModel
 import com.funy4.domain.repo.CashRepo
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.util.*
 import javax.inject.Inject
@@ -26,6 +27,8 @@ class CashRepoImpl @Inject constructor(
     }
 
     override suspend fun get(id: UUID) = cashDao.get(id)?.toModel()
+
+    override suspend fun getCashSum(): Flow<Double> = cashDao.getCashSum()
 
     override fun getAllFlow() = cashDao.getAll().map { list -> list.map { it.toModel() } }
 }

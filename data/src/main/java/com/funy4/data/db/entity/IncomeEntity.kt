@@ -10,5 +10,4 @@ data class IncomeEntity(
     val name: String,
     val color: Int,
     val icon: Int,
-    val money: Double
 )

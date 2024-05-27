@@ -2,6 +2,7 @@ package com.funy4.mymicromoney.ui.screens.expensescreen.views
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -17,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -73,9 +75,11 @@ fun ExpensesTextField(modifier: Modifier = Modifier, onDoneClick: (String) -> Un
 fun AddCategoryCard(
     modifier: Modifier = Modifier,
     title: String,
-    onConfirmClick: (String) -> Unit,
+    iconId: Int,
     cardBackgroundColor: Color = MaterialTheme.colors.background,
-    onCloseClick: () -> Unit
+    onConfirmClick: (String) -> Unit,
+    onCloseClick: () -> Unit,
+    onIconClick: () -> Unit
 ) {
     Box(
         modifier = modifier
@@ -92,7 +96,6 @@ fun AddCategoryCard(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.TopCenter
         ) {
-
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Spacer(Modifier.height(16.dp))
                 Text(
@@ -101,11 +104,14 @@ fun AddCategoryCard(
                     fontSize = 20.sp
                 )
                 Spacer(Modifier.height(10.dp))
-                ExpensesTextField(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .fillMaxWidth(),
-                    onDoneClick = { onConfirmClick(it) })
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(4.dp)) {
+                    Icon(painter = painterResource(id = iconId), contentDescription = null, modifier = Modifier.size(42.dp).clickable(onClick = onIconClick))
+                    ExpensesTextField(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .fillMaxWidth(),
+                        onDoneClick = { onConfirmClick(it) })
+                }
             }
         }
     }

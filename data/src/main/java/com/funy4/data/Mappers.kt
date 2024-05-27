@@ -20,7 +20,8 @@ fun CashModel.toEntity() = CashEntity(
     id = id,
     name = name,
     icon = icon,
-    money = money,)
+    money = money,
+)
 
 fun TransactionEntity.toModel() = TransactionModel(
     id = id,
@@ -40,7 +41,7 @@ fun TransactionModel.toEntity() = TransactionEntity(
     date = date
 )
 
-fun ExpensesEntity.toModel() = ExpenseModel(
+fun ExpensesEntity.toModel(money: Double) = ExpenseModel(
     id = id,
     name = name,
     color = color,
@@ -53,10 +54,9 @@ fun ExpenseModel.toEntity() = ExpensesEntity(
     name = name,
     color = color,
     icon = iconId,
-    money = money
 )
 
-fun IncomeEntity.toModel() = IncomeModel(
+fun IncomeEntity.toModel(money: Double) = IncomeModel(
     id = id,
     name = name,
     color = color,
@@ -69,5 +69,4 @@ fun IncomeModel.toEntity() = IncomeEntity(
     name = name,
     color = color,
     icon = iconId,
-    money = money
 )

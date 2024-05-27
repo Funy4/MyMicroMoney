@@ -1,6 +1,6 @@
 package com.funy4.domain.model
 
-data class IncomeWithTransactionModel(
+data class IncomeWithTransactionsModel(
     val income: IncomeModel,
     val transactions: List<TransactionModel>
 )

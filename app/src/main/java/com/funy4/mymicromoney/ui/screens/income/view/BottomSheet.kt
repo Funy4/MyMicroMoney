@@ -21,7 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.funy4.domain.model.IncomeModel
-import com.funy4.domain.model.IncomeWithTransactionModel
+import com.funy4.domain.model.IncomeWithTransactionsModel
 import com.funy4.domain.model.TransactionModel
 import com.funy4.domain.model.type.TransactionType
 import com.funy4.mymicromoney.R
@@ -30,7 +30,7 @@ import java.util.*
 
 
 @Composable
-fun IncomeTransactionsBottomSheet(transactions: List<IncomeWithTransactionModel>) {
+fun IncomeTransactionsBottomSheet(transactions: List<IncomeWithTransactionsModel>) {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -125,7 +125,7 @@ fun PreviewTransactionItem() {
                     id = UUID.randomUUID(),
                     name = "Food",
                     color = Color.Red.toArgb(),
-                    iconId = R.drawable.ic_food_dining,
+                    iconId = R.drawable.ic_8,
                     money = 523.0
                 ),
                 transactionModel = TransactionModel(

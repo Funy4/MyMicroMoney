@@ -45,19 +45,21 @@ fun ExpenseTransactionsBottomSheet(transactions: List<ExpenseWithTransactionsMod
             Spacer(Modifier.height(16.dp))
             LazyColumn(contentPadding = PaddingValues(horizontal = 16.dp)) {
                 items(transactions) { expenseWithTransactions ->
-                    Text(
-                        text = expenseWithTransactions.expenseModel.name,
-                        fontSize = 30.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                    )
-                    Spacer(Modifier.height(5.dp))
-                    for (transaction in expenseWithTransactions.transactions) {
-                        Spacer(Modifier.height(16.dp))
-                        TransactionItem(
-                            expenseModel = expenseWithTransactions.expenseModel,
-                            transactionModel = transaction
+                    if (expenseWithTransactions.transactions.isNotEmpty()) {
+                        Text(
+                            text = expenseWithTransactions.expenseModel.name,
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
                         )
+                        Spacer(Modifier.height(5.dp))
+                        for (transaction in expenseWithTransactions.transactions) {
+                            Spacer(Modifier.height(16.dp))
+                            TransactionItem(
+                                expenseModel = expenseWithTransactions.expenseModel,
+                                transactionModel = transaction
+                            )
+                        }
                     }
                 }
             }
@@ -125,7 +127,7 @@ fun PreviewTransactionItem() {
                     id = UUID.randomUUID(),
                     name = "Food",
                     color = Color.Red.toArgb(),
-                    iconId = R.drawable.ic_food_dining,
+                    iconId = R.drawable.ic_8,
                     money = 523.0
                 ),
                 transactionModel = TransactionModel(

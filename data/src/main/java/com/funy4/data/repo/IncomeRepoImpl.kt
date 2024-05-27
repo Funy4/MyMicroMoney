@@ -30,9 +30,11 @@ class IncomeRepoImpl @Inject constructor(
         }
     }
 
-    override suspend fun get(id: UUID): IncomeModel? = incomeDao.get(id)?.toModel()
+    override suspend fun get(id: UUID): IncomeModel? = incomeDao.get(id)?.let{
+        it.income.toModel(it.transactions.sumOf { it.cost })
+    }
 
     override fun getAllFlow(): Flow<List<IncomeModel>> =
-        incomeDao.getAll().map { list -> list.map { it.toModel() } }
+        incomeDao.getIncomesWithTransactions().map { list -> list.map { it.income.toModel(it.transactions.sumOf { it.cost }) } }
 
 }

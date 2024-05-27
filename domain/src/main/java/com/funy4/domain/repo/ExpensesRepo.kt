@@ -16,5 +16,5 @@ interface ExpensesRepo {
 
     fun getAllFlow(): Flow<List<ExpenseModel>>
 
-    fun getAllExpensesWithTransactionsFlow(): Flow<List<ExpenseWithTransactionsModel>>
+//    fun getAllExpensesWithTransactionsFlow(): Flow<List<ExpenseWithTransactionsModel>>
 }

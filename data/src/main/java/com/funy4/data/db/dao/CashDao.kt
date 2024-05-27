@@ -12,4 +12,7 @@ interface CashDao: BaseDao<CashEntity> {
 
     @Query("select * from cash where id = :id")
     suspend fun get(id: UUID): CashEntity?
+
+    @Query("select sum(money) from cash")
+    fun getCashSum(): Flow<Double>
 }

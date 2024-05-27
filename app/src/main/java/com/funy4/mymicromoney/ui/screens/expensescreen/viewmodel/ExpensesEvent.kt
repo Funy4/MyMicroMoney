@@ -12,4 +12,8 @@ interface ExpensesEvent {
     data class OnLongPressExpense(val item: ExpenseModel) : ExpensesEvent
     data class OnSaveExpenseClick(val name: String) : ExpensesEvent
     data class OnDeleteExpense(val id: UUID) : ExpensesEvent
+
+    object OnSelectIconClick: ExpensesEvent
+    object OnDismissSelectedIcon: ExpensesEvent
+    data class OnSelectNewIcon(val iconId: Int): ExpensesEvent
 }

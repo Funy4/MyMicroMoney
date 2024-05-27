@@ -3,6 +3,10 @@ package com.funy4.mymicromoney.di
 import android.content.Context
 import androidx.room.Room
 import com.funy4.data.db.Database
+import com.funy4.mymicromoney.util.LenientJsonAdapterFactory
+import com.funy4.mymicromoney.util.MoshiLocalDateTimeAdapter
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -37,4 +41,15 @@ class DataModule {
     @Singleton
     fun provideExpensesDao(database: Database) = database.expensesDao()
 
+    @Provides
+    @Singleton
+    fun provideExpenseTransactionalDao(database: Database) = database.expenseTransactionalDao()
+
+    @Provides
+    @Singleton
+    fun provideMoshi() = Moshi.Builder()
+        .add(KotlinJsonAdapterFactory())
+        .add(LenientJsonAdapterFactory())
+        .add(MoshiLocalDateTimeAdapter())
+        .build()
 }

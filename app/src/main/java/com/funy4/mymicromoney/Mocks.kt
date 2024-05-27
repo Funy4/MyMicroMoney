@@ -13,21 +13,21 @@ class Mocks {
                 id = UUID.fromString("bbe129d3-78e7-40cd-a3b6-f251a76e5a0f"),
                 name = "First",
                 money = 15.0,
-                iconId = R.drawable.ic_food_restaurant,
+                iconId = R.drawable.ic_9,
                 color = Color.Gray.toArgb(),
             ),
             ExpenseModel(
                 id = UUID.fromString("67184267-a970-476b-bc39-7d98b4619639"),
                 name = "Second",
                 money = 15.0,
-                iconId = R.drawable.ic_food_dining,
+                iconId = R.drawable.ic_8,
                 color = Color.Red.toArgb(),
             ),
             ExpenseModel(
                 id = UUID.fromString("9d53c392-2beb-45b9-b339-76ef6abd0c03"),
                 name = "Thirty",
                 money = 15.0,
-                iconId = R.drawable.ic_bus,
+                iconId = R.drawable.ic_10,
                 color = Color.Blue.toArgb(),
             ),
             ExpenseModel(
@@ -46,7 +46,7 @@ class Mocks {
                     name = "Food",
                     money = 52512.0,
                     color = Color.Green.toArgb(),
-                    iconId = R.drawable.ic_food_dining
+                    iconId = R.drawable.ic_8
                 ),
                 transactions = listOf(
                     TransactionModel(
@@ -65,7 +65,7 @@ class Mocks {
                     name = "Transport",
                     money = 124512.0,
                     color = Color.Green.toArgb(),
-                    iconId = R.drawable.ic_bus
+                    iconId = R.drawable.ic_10
                 ),
                 transactions = listOf(
                     TransactionModel(
@@ -91,7 +91,7 @@ class Mocks {
             CashModel(
                 id = UUID.fromString("9452aa8d-e813-4f24-83ea-1786f1af2bc3"),
                 name = "Наличные",
-                icon = R.drawable.ic_banknotes,
+                icon = R.drawable.ic_cash_2,
                 money = 1424.0
             ),
             CashModel(
@@ -107,7 +107,7 @@ class Mocks {
                 id = UUID.fromString("e9916552-5cf6-4b9b-a7d8-2732ba7394c6"),
                 name = "Стипендия",
                 color = Color.Green.toArgb(),
-                iconId = R.drawable.ic_wallet,
+                iconId = R.drawable.ic_cash_1,
                 money = 3996.84,
             ),
             IncomeModel(
@@ -120,12 +120,12 @@ class Mocks {
         )
 
         val incomeWithTransactions = listOf(
-            IncomeWithTransactionModel(
+            IncomeWithTransactionsModel(
                 income = IncomeModel(
                     id = UUID.fromString("e9916552-5cf6-4b9b-a7d8-2732ba7394c6"),
                     name = "Зарплата",
                     color = Color.Green.toArgb(),
-                    iconId = R.drawable.ic_wallet,
+                    iconId = R.drawable.ic_cash_1,
                     money = 532526.84,
                 ),
                 transactions = listOf(

@@ -14,13 +14,14 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import com.funy4.mymicromoney.ui.screens.addexpense.AddExpenseTransaction
+import com.funy4.mymicromoney.ui.screens.addincome.AddIncomeTransaction
 import com.funy4.mymicromoney.ui.screens.ai.AiScreen
 import com.funy4.mymicromoney.ui.screens.cash.CashScreen
 import com.funy4.mymicromoney.ui.screens.expensescreen.ExpensesScreen
 import com.funy4.mymicromoney.ui.screens.income.IncomeScreen
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
+import java.util.UUID
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -71,9 +72,22 @@ fun NavGraph(navController: NavHostController, padding: PaddingValues) {
                 navArgument("expenseId") { type = NavType.StringType }
             )
         ) {
-            AddExpenseTransaction(
+            AddIncomeTransaction(
                 modifier = Modifier.padding(padding),
-                navController = navController
+                navController = navController,
+                baseIncomeId = UUID.fromString(it.arguments?.getString("expenseId"))
+            )
+        }
+        composable(
+            route = Screen.AddIncome.route + "/{incomeId}",
+            arguments = listOf(
+                navArgument("incomeId") { type = NavType.StringType }
+            )
+        ) {
+            AddIncomeTransaction(
+                modifier = Modifier.padding(padding),
+                navController = navController,
+                baseIncomeId = UUID.fromString(it.arguments?.getString("incomeId"))
             )
         }
     }

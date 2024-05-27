@@ -1,11 +1,11 @@
 package com.funy4.mymicromoney.ui.screens.ai
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -13,25 +13,30 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCompositionContext
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import co.yml.charts.axis.AxisData
 import co.yml.charts.common.model.Point
 import co.yml.charts.ui.linechart.LineChart
@@ -45,6 +50,9 @@ import co.yml.charts.ui.linechart.model.SelectionHighlightPoint
 import co.yml.charts.ui.linechart.model.SelectionHighlightPopUp
 import co.yml.charts.ui.linechart.model.ShadowUnderLine
 import com.funy4.mymicromoney.R
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import kotlin.coroutines.coroutineContext
 
 @Composable
 fun AiScreen(modifier: Modifier = Modifier, viewModel: AiViewModel = hiltViewModel()) {
@@ -65,7 +73,7 @@ fun AiScreen(modifier: Modifier = Modifier, viewModel: AiViewModel = hiltViewMod
                 val (title, daysTitle, daysField, button) = createRefs()
                 Text(text = "Прогнозирование вашего бюджета", fontSize = 18.sp, modifier = Modifier
                     .constrainAs(title) {
-                        top.linkTo(parent.top, margin = 4.dp)
+                        top.linkTo(parent.top, margin = 16.dp)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                     }
@@ -124,34 +132,46 @@ fun AiScreen(modifier: Modifier = Modifier, viewModel: AiViewModel = hiltViewMod
 
         is AiState.Showdata -> {
             ConstraintLayout {
-                val (title, graphic) = createRefs()
-                Text(text = "Ваш прогноз показан на графике", Modifier.constrainAs(title) {
-                    top.linkTo(parent.top)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                })
-                val pointsData = state.transactions.map {
+                val (title, graphic, isPositiveConstr) = createRefs()
+                Text(
+                    text = "Ваш прогноз показан на графике",
+                    fontSize = 18.sp,
+                    modifier = Modifier.constrainAs(title) {
+                        top.linkTo(parent.top, margin = 16.dp)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    })
+                val pointsData = state.predict.predictedTransactions.map {
                     Point(
                         it.date.dayOfYear.toFloat(),
                         it.amount.toFloat()
                     )
                 }
                 val ySteps = 10
+                val pointsSize = pointsData.size
                 val xAxisData = AxisData.Builder()
-                    .axisStepSize(100.dp)
+                    .axisStepSize(
+                        when {
+                            pointsSize <= 8 -> 40.dp
+                            pointsSize <= 14 -> 30.dp
+                            else -> 20.dp
+                        }
+                    )
                     .backgroundColor(Color.Transparent)
                     .steps(pointsData.size - 1)
-                    .labelData { i -> i.toString() }
+                    .labelData { i -> (i + 1).toString() }
                     .labelAndAxisLinePadding(15.dp)
+                    .axisLineColor(MaterialTheme.colors.primary)
                     .build()
 
                 val yAxisData = AxisData.Builder()
                     .steps(ySteps)
                     .backgroundColor(Color.Transparent)
                     .labelAndAxisLinePadding(20.dp)
+                    .axisLineColor(MaterialTheme.colors.primary)
                     .labelData { i ->
-                        val max = state.transactions.maxOf { it.amount }
-                        val min = state.transactions.minOf { it.amount }
+                        val max = state.predict.predictedTransactions.maxOf { it.amount }
+                        val min = state.predict.predictedTransactions.minOf { it.amount }
                         val yScale =
                             (max - min) / ySteps
                         String.format("%.1f", i * yScale.toFloat() + min.toFloat()) + "₽"
@@ -161,8 +181,8 @@ fun AiScreen(modifier: Modifier = Modifier, viewModel: AiViewModel = hiltViewMod
                         lines = listOf(
                             Line(
                                 dataPoints = pointsData,
-                                LineStyle(),
-                                IntersectionPoint(),
+                                LineStyle(color = MaterialTheme.colors.primary),
+                                IntersectionPoint(color = MaterialTheme.colors.primaryVariant),
                                 SelectionHighlightPoint(),
                                 ShadowUnderLine(),
                                 SelectionHighlightPopUp()
@@ -172,18 +192,41 @@ fun AiScreen(modifier: Modifier = Modifier, viewModel: AiViewModel = hiltViewMod
                     xAxisData = xAxisData,
                     yAxisData = yAxisData,
                     gridLines = GridLines(),
-                    backgroundColor = Color.White
+                    backgroundColor = Color(0x22FFFFFF),
                 )
-                LineChart(
+                Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .height(300.dp)
+                        .padding(horizontal = 16.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .fillMaxWidth()
+                        .height(400.dp)
                         .constrainAs(graphic) {
                             top.linkTo(title.bottom, margin = 24.dp)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
+                            start.linkTo(parent.start, 16.dp)
+                            end.linkTo(parent.end, 16.dp)
                         },
-                    lineChartData = lineChartData
+                ) {
+                    LineChart(
+                        modifier = Modifier.fillMaxSize(),
+                        lineChartData = lineChartData
+                    )
+                }
+
+                val isPositiveText = if (state.predict.isPositive) {
+                    "Ваш прогноз положительный!"
+                } else {
+                    "Ваш прогноз отрицательный."
+                }
+                Text(
+                    text = isPositiveText,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (!state.predict.isPositive) Color(0xFF11FF00) else Color(0xFF990000),
+                    modifier = Modifier.constrainAs(isPositiveConstr) {
+                        end.linkTo(parent.end)
+                        start.linkTo(parent.start)
+                        top.linkTo(graphic.bottom, 16.dp)
+                    }
                 )
             }
         }

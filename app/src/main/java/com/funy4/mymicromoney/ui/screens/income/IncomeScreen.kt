@@ -1,5 +1,6 @@
 package com.funy4.mymicromoney.ui.screens.income
 
+import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -8,7 +9,9 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -17,8 +20,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.funy4.mymicromoney.R
+import com.funy4.mymicromoney.ui.IconUtil
 import com.funy4.mymicromoney.ui.navigation.Screen
+import com.funy4.mymicromoney.ui.screens.cash.IconSelectorDialog
+import com.funy4.mymicromoney.ui.screens.expensescreen.viewmodel.ExpensesEvent
 import com.funy4.mymicromoney.ui.screens.expensescreen.views.AddCategoryCard
+import com.funy4.mymicromoney.ui.screens.expensescreen.views.DeleteObjectAlertDialog
 import com.funy4.mymicromoney.ui.screens.income.view.IncomeIconsList
 import com.funy4.mymicromoney.ui.screens.income.view.IncomeTransactionsBottomSheet
 import com.funy4.mymicromoney.ui.screens.income.viewmodel.IncomeEvent
@@ -39,10 +46,10 @@ fun IncomeScreen(
         bottomSheetState = bottomSheetState
     )
 
-    val incomeList by viewModel.incomeList.collectAsState(initial = emptyList())
-    val transactionList by viewModel.transactionList.collectAsState(initial = emptyList())
+
 
     val density = LocalDensity.current // For animations
+    val context = LocalContext.current
 
     LaunchedEffect(key1 = true) {
         viewModel.viewModelScope.launch {
@@ -50,6 +57,10 @@ fun IncomeScreen(
                 when (event) {
                     is IncomeUiEvent.OpenAddTransactionScreen -> {
                         navController.navigate(Screen.AddExpense.route + "/${event.id}")
+                    }
+
+                    IncomeUiEvent.ShowNoCashSize -> {
+                        Toast.makeText(context, "У вас нет счетов!", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -68,7 +79,7 @@ fun IncomeScreen(
         scaffoldState = bottomSheetScaffoldState,
         drawerElevation = 100.dp,
         sheetShape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-        sheetContent = { IncomeTransactionsBottomSheet(transactionList) },
+        sheetContent = { IncomeTransactionsBottomSheet(viewModel.transactions.value) },
         backgroundColor = androidx.compose.ui.graphics.Color.Transparent,
         sheetBackgroundColor = MaterialTheme.colors.primary,
     ) {
@@ -86,16 +97,18 @@ fun IncomeScreen(
                     modifier = Modifier
                         .padding(horizontal = 20.dp)
                         .padding(top = 20.dp),
-                    title = "Add income",
-                    onConfirmClick = { viewModel.onEvent(IncomeEvent.OnSaveIncomeClick) },
-                    onCloseClick = { viewModel.onEvent(IncomeEvent.OnCloseAddIncomeClick) }
+                    title = "Добавить категорию дохода",
+                    onConfirmClick = { viewModel.onEvent(IncomeEvent.OnSaveIncomeClick(it)) },
+                    onCloseClick = { viewModel.onEvent(IncomeEvent.OnCloseAddIncomeClick) },
+                    iconId = viewModel.selectedIconId.value,
+                    onIconClick = { viewModel.onEvent(IncomeEvent.OnCreateIncomeIconClick) }
                 )
             }
 
             Spacer(Modifier.height(10.dp))
             IncomeIconsList(
                 modifier = modifier,
-                incomes = incomeList,
+                incomes = viewModel.incomeList.value,
                 showAddIcon = !viewModel.showAddIncome.value,
                 onItemClick = { item ->
                     coroutineScope.launch {
@@ -108,14 +121,19 @@ fun IncomeScreen(
                 onLongPressItem = { viewModel.onEvent(IncomeEvent.OnLongItemPress(it)) }
             )
         }
-    }
-}
+        if (viewModel.showSelectIconDialog.value) {
+            IconSelectorDialog(
+                icons = IconUtil.allExpensesIncomeIconsIds,
+                onDismissRequest = { viewModel.onEvent(IncomeEvent.OnCreateIncomeIconDismiss) }) {
+                viewModel.onEvent(IncomeEvent.OnCreateIncomeSelectIcon(it))
+            }
+        }
+        if(viewModel.showDeleteDialog.value) {
+            DeleteObjectAlertDialog(
+                onDismiss = { viewModel.onEvent(IncomeEvent.OnDismissDeleteDialog) },
+                onConfirm = { viewModel.onEvent(IncomeEvent.OnAcceptDeleteIncome) }
+            )
+        }
 
-@Composable
-@Preview(showBackground = true)
-fun PreviewExpScreen() {
-    Box(Modifier.fillMaxSize()) {
-//        ExpensesIconsList(expenses = Mocks.expensesList, onItemClick = {}) {
-//        ExpensesScreen(navController = rememberNavController())
     }
 }

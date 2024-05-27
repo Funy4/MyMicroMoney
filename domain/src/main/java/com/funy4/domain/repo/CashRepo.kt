@@ -13,5 +13,7 @@ interface CashRepo {
 
     suspend fun get(id: UUID): CashModel?
 
+    suspend fun getCashSum(): Flow<Double?>
+
     fun getAllFlow(): Flow<List<CashModel>>
 }

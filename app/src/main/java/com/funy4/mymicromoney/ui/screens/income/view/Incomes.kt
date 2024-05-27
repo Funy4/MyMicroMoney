@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.funy4.domain.model.IncomeModel
+import com.funy4.mymicromoney.R
 import com.funy4.mymicromoney.ui.screens.expensescreen.views.CategoryItem
 import com.funy4.mymicromoney.ui.screens.expensescreen.views.CategoryItemNew
 
@@ -41,7 +42,7 @@ fun IncomeIconsList(
                 modifier = Modifier.padding(10.dp),
                 title = income.name,
                 color = Color(income.color),
-                imageVector = Icons.Default.Face,
+                iconId = R.drawable.ic_1,
                 cost = income.money,
                 onItemClick = { onItemClick(income) },
                 onLongPressItem = {onLongPressItem(income)}
@@ -63,19 +64,5 @@ fun IncomeIconsList(
                 )
             }
         }
-    }
-}
-
-
-@Composable
-@Preview
-fun IconPreview() {
-    CategoryItem(
-        title = "food",
-        color = Color.Black,
-        imageVector = Icons.Default.Favorite,
-        cost = 100.0,
-        onItemClick = {}
-    ) {
     }
 }
