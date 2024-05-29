@@ -9,6 +9,7 @@ import retrofit2.create
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,10 +30,13 @@ interface ApiService {
             var instance = mInstance
             if (instance != null) return instance
             val okHttpClient = OkHttpClient.Builder()
+                .connectTimeout(60, TimeUnit.SECONDS)  // Устанавливает тайм-аут на подключение
+                .readTimeout(60, TimeUnit.SECONDS)     // Устанавливает тайм-аут на чтение
+                .writeTimeout(60, TimeUnit.SECONDS)
                 .also {/* We can add interceptors */ }
                 .build()
             mInstance = Retrofit.Builder()
-                .baseUrl("http://172.29.15.66:8083")
+                .baseUrl("http://192.168.1.109:8083")
                 .client(okHttpClient)
                 .addConverterFactory(MoshiConverterFactory.create(moshi))
                 .build()

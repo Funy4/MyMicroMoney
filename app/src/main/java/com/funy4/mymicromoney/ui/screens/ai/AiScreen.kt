@@ -1,5 +1,6 @@
 package com.funy4.mymicromoney.ui.screens.ai
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,20 +18,20 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCompositionContext
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -50,9 +51,7 @@ import co.yml.charts.ui.linechart.model.SelectionHighlightPoint
 import co.yml.charts.ui.linechart.model.SelectionHighlightPopUp
 import co.yml.charts.ui.linechart.model.ShadowUnderLine
 import com.funy4.mymicromoney.R
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import kotlin.coroutines.coroutineContext
+import kotlinx.coroutines.launch
 
 @Composable
 fun AiScreen(modifier: Modifier = Modifier, viewModel: AiViewModel = hiltViewModel()) {
@@ -62,6 +61,17 @@ fun AiScreen(modifier: Modifier = Modifier, viewModel: AiViewModel = hiltViewMod
         contentDescription = null,
         contentScale = ContentScale.FillBounds
     )
+    val context = LocalContext.current
+    LaunchedEffect(key1 = true) {
+        viewModel.events.collect { event ->
+            when (event) {
+                AiEvent.ShowServerErrorException -> {
+                    Toast.makeText(context, "Ошибка подключения к серверу", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
+        }
+    }
     when (val state = viewModel.state.collectAsState().value) {
         AiState.EnterData -> {
             var daysCount by remember { mutableStateOf("30") }
@@ -102,7 +112,7 @@ fun AiScreen(modifier: Modifier = Modifier, viewModel: AiViewModel = hiltViewMod
                         }
                 )
                 Button(
-                    onClick = { viewModel.handleAction(Action.OnDoPredictClick(daysCount.toInt())) },
+                    onClick = { viewModel.handleAction(AiAction.OnDoPredictClick(daysCount.toInt())) },
                     Modifier
                         .constrainAs(button) {
                             top.linkTo(daysField.bottom, margin = 24.dp)
@@ -132,7 +142,7 @@ fun AiScreen(modifier: Modifier = Modifier, viewModel: AiViewModel = hiltViewMod
 
         is AiState.Showdata -> {
             ConstraintLayout {
-                val (title, graphic, isPositiveConstr) = createRefs()
+                val (title, graphic, isPositiveConstr, ready) = createRefs()
                 Text(
                     text = "Ваш прогноз показан на графике",
                     fontSize = 18.sp,
@@ -221,13 +231,26 @@ fun AiScreen(modifier: Modifier = Modifier, viewModel: AiViewModel = hiltViewMod
                     text = isPositiveText,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if (!state.predict.isPositive) Color(0xFF11FF00) else Color(0xFF990000),
+                    color = if (state.predict.isPositive) Color(0xFF11FF00) else Color(0xFF990000),
                     modifier = Modifier.constrainAs(isPositiveConstr) {
                         end.linkTo(parent.end)
                         start.linkTo(parent.start)
                         top.linkTo(graphic.bottom, 16.dp)
                     }
                 )
+
+                Button(
+                    onClick = { viewModel.handleAction(AiAction.OnReadyClick) },
+                    modifier = Modifier
+                        .size(96.dp, 42.dp)
+                        .constrainAs(ready) {
+                            top.linkTo(isPositiveConstr.bottom, 16.dp)
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                        }
+                ) {
+                    Text(text = "Готово", fontSize = 16.sp)
+                }
             }
         }
     }
